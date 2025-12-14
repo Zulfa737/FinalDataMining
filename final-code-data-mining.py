@@ -8,6 +8,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
+import os
 
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Dashboard Supermarket", layout="wide")
@@ -15,14 +16,25 @@ st.set_page_config(page_title="Dashboard Supermarket", layout="wide")
 st.title("📊 Dashboard Analisis Supermarket")
 st.write("Aplikasi ini melakukan Eksplorasi Data, Clustering (Segmentasi), dan Regresi (Prediksi).")
 
-# --- 1. UPLOAD / LOAD DATA ---
-st.sidebar.header("1. Upload Data")
-uploaded_file = st.sidebar.file_uploader("Upload file 'superMarket.csv'", type=["csv"])
+# --- 1. LOAD DATA OTOMATIS ---
+# Kita coba load file langsung.
+# Asumsinya: file 'superMarket.csv' ada di folder yang SAMA dengan file script ini di GitHub.
 
-# Fungsi untuk memproses data
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
-    st.sidebar.success("File berhasil dimuat!")
+@st.cache_data
+def load_data():
+    try:
+        # Mencoba membaca file lokal (jika satu folder)
+        return pd.read_csv('superMarket.csv')
+    except FileNotFoundError:
+        # Opsi Cadangan: Jika dijalankan lokal tapi file tidak ketemu, 
+        # bisa pakai URL Raw GitHub (Opsional, ganti URL_RAW_ANDA jika perlu)
+        # return pd.read_csv('https://raw.githubusercontent.com/USERNAME/REPO/main/superMarket.csv')
+        return None
+
+df = load_data()
+
+if df is not None:
+    st.sidebar.success("Data berhasil dimuat dari sistem!")
 
     # --- 2. EKSPLORASI DATA ---
     st.header("1. Eksplorasi Data")
@@ -117,4 +129,4 @@ if uploaded_file is not None:
     st.pyplot(fig_reg)
 
 else:
-    st.info("Silakan upload file CSV di sidebar sebelah kiri untuk memulai.")
+    st.error("File 'superMarket.csv' tidak ditemukan di folder yang sama. Mohon cek repository GitHub Anda.")
